@@ -1,0 +1,82 @@
+# Rust/Cargo
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Move
+**/*.v
+**/*.o
+
+# Node/Frontend
+node_modules/
+npm-debug.log
+yarn-error.log
+dist/
+build/
+.next/
+out/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+.postgres
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+.DS_Store
+*.exe
+
+# Logs
+*.log
+logs/
+
+# Dependencies cache
+.cargo/
+vendor/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Testing
+tarpaulin-report.html
+cobertura.xml
+
+# Build outputs
+dist/
+build/
+*.war
+*.jar
+
+# API/Config
+.sui/
+sui_config/
+
+# Deployment
+deployments/
+*.pem
+*.key
+
+# Tools
+**/.next/
+**/out/
