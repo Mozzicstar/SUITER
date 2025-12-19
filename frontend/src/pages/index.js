@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { fetchPosts, fetchRankings } from '../lib/api';
+import { fetchPosts, fetchRankings, createPost } from '../lib/api';
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
   const [rankings, setRankings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('feed');
+  const [content, setContent] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -75,14 +78,47 @@ export default function Home() {
             {/* Create Post Card */}
             <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/10 border border-purple-500/30 rounded-xl p-6 backdrop-blur-sm">
               <h3 className="text-sm font-semibold text-purple-300 mb-4">✨ Share Truth</h3>
+              <label htmlFor="post-content" className="sr-only">Post content</label>
               <textarea
+                id="post-content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
                 placeholder="What's on your mind?"
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500/50 resize-none"
-                rows="3"
+                rows="4"
+                aria-label="Post content"
               />
-              <button className="w-full mt-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-2 rounded-lg transition transform hover:scale-105">
-                Post
+              <button
+                onClick={async () => {
+                  if (!content || content.trim().length < 3) {
+                    setToast({ type: 'error', text: 'Please enter at least 3 characters' });
+                    setTimeout(() => setToast(null), 3000);
+                    return;
+                  }
+                  setSubmitting(true);
+                  try {
+                    await createPost({ content_hash: content });
+                    setToast({ type: 'success', text: 'Post created — refreshing feed' });
+                    setContent('');
+                    // refresh
+                    const [postsData, rankingsData] = await Promise.all([fetchPosts(), fetchRankings()]);
+                    setPosts(postsData || []);
+                    setRankings(rankingsData || []);
+                  } catch (err) {
+                    console.error(err);
+                    setToast({ type: 'error', text: 'Failed to create post' });
+                  }
+                  setTimeout(() => setToast(null), 3000);
+                  setSubmitting(false);
+                }}
+                disabled={submitting}
+                className={`w-full mt-3 ${submitting ? 'opacity-60 cursor-wait' : ''} bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-2 rounded-lg transition transform hover:scale-105`}
+              >
+                {submitting ? 'Posting...' : 'Post'}
               </button>
+              {toast && (
+                <div className={`mt-3 text-sm ${toast.type === 'error' ? 'text-red-300' : 'text-green-300'}`}>{toast.text}</div>
+              )}
             </div>
           </div>
 
