@@ -59,4 +59,14 @@ export const fetchRankings = async () => {
   }
 };
 
+export const createPost = async (payload) => {
+  try {
+    const response = await api.post('/api/posts', payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating post:', error);
+    throw error;
+  }
+};
+
 export default api;
