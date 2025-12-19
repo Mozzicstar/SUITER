@@ -1,0 +1,20 @@
+[package]
+name = "suiter-indexer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.35", features = ["full"] }
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+reqwest = { version = "0.11", features = ["json"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1.0"
+dotenv = "0.15"
+chrono = { version = "0.4", features = ["serde"] }
+
+[[bin]]
+name = "suiter-indexer"
+path = "src/main.rs"
