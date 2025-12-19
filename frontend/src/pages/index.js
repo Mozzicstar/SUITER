@@ -6,9 +6,11 @@ export default function Home() {
   const [rankings, setRankings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('feed');
+  const [author, setAuthor] = useState('anonymous');
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
+  const [cooldown, setCooldown] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -26,7 +28,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const topPosts = posts.sort((a, b) => (b.attention_accumulated || 0) - (a.attention_accumulated || 0));
+  const topPosts = [...posts].sort((a, b) => (b.attention_accumulated || 0) - (a.attention_accumulated || 0));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-900 to-slate-900">
@@ -78,6 +80,15 @@ export default function Home() {
             {/* Create Post Card */}
             <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/10 border border-purple-500/30 rounded-xl p-6 backdrop-blur-sm">
               <h3 className="text-sm font-semibold text-purple-300 mb-4">✨ Share Truth</h3>
+              <label htmlFor="post-author" className="sr-only">Author</label>
+              <input
+                id="post-author"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="Author (optional)"
+                className="w-full mb-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 text-sm focus:outline-none"
+                aria-label="Author"
+              />
               <label htmlFor="post-content" className="sr-only">Post content</label>
               <textarea
                 id="post-content"
@@ -95,21 +106,39 @@ export default function Home() {
                     setTimeout(() => setToast(null), 3000);
                     return;
                   }
+                  if (cooldown) return;
                   setSubmitting(true);
+                  setCooldown(true);
+                  // optimistic post
+                  const tempId = `temp-${Date.now()}`;
+                  const tempPost = {
+                    id: tempId,
+                    author: author || 'anonymous',
+                    content_hash: content,
+                    level: 1,
+                    attention_accumulated: 0,
+                    created_at: new Date().toISOString(),
+                  };
+                  setPosts((p) => [tempPost, ...p]);
                   try {
-                    await createPost({ content_hash: content });
-                    setToast({ type: 'success', text: 'Post created — refreshing feed' });
+                    const res = await createPost({ content_hash: content, author: author });
+                    // replace temp id with real id
+                    setPosts((p) => p.map((it) => (it.id === tempId ? { ...it, id: res.id } : it)));
+                    setToast({ type: 'success', text: 'Post created' });
                     setContent('');
-                    // refresh
-                    const [postsData, rankingsData] = await Promise.all([fetchPosts(), fetchRankings()]);
-                    setPosts(postsData || []);
+                    // refresh rankings
+                    const rankingsData = await fetchRankings();
                     setRankings(rankingsData || []);
                   } catch (err) {
                     console.error(err);
+                    // remove temp post
+                    setPosts((p) => p.filter((it) => it.id !== tempId));
                     setToast({ type: 'error', text: 'Failed to create post' });
                   }
                   setTimeout(() => setToast(null), 3000);
                   setSubmitting(false);
+                  // short cooldown to avoid spam
+                  setTimeout(() => setCooldown(false), 2000);
                 }}
                 disabled={submitting}
                 className={`w-full mt-3 ${submitting ? 'opacity-60 cursor-wait' : ''} bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-2 rounded-lg transition transform hover:scale-105`}

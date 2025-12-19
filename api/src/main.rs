@@ -16,7 +16,7 @@ mod models;
 
 /// Application state
 pub struct AppState {
-    pool: SqlitePool,
+    pub pool: SqlitePool,
 }
 
 #[tokio::main]
@@ -45,6 +45,7 @@ async fn main() {
     let app = Router::new()
         // Post endpoints
         .route("/api/posts", post(handlers::posts::create_post))
+        .route("/api/posts", get(handlers::posts::get_feed))
         .route("/api/posts/:id", get(handlers::posts::get_post))
         .route("/api/posts/feed", get(handlers::posts::get_feed))
         
