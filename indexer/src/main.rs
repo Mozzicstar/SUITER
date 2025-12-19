@@ -1,5 +1,5 @@
 use anyhow::Result;
-use sqlx::postgres::PgPoolOptions;
+use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::Row;
 use std::env;
 use tracing::{info, error};
@@ -24,67 +24,29 @@ async fn main() -> Result<()> {
         .unwrap_or_else(|_| "https://fullnode.testnet.sui.io:443".to_string());
 
     // Setup database connection pool
-    let pool = PgPoolOptions::new()
+    let pool = SqlitePoolOptions::new()
         .max_connections(5)
         .connect(&database_url)
         .await?;
 
-    info!("Connected to PostgreSQL");
+    info!("Connected to SQLite");
 
-    // Run migrations
-    sqlx::query(
-        r#"
-        CREATE TABLE IF NOT EXISTS profiles (
-            address VARCHAR PRIMARY KEY,
-            reputation BIGINT NOT NULL DEFAULT 50,
-            total_posts BIGINT NOT NULL DEFAULT 0,
-            total_attention_earned BIGINT NOT NULL DEFAULT 0,
-            joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-        );
-        
-        CREATE TABLE IF NOT EXISTS posts (
-            id VARCHAR PRIMARY KEY,
-            author VARCHAR NOT NULL,
-            content_hash VARCHAR NOT NULL,
-            attention_accumulated BIGINT NOT NULL DEFAULT 0,
-            level SMALLINT NOT NULL DEFAULT 1,
-            created_at TIMESTAMP NOT NULL,
-            updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            FOREIGN KEY (author) REFERENCES profiles(address)
-        );
-        
-        CREATE TABLE IF NOT EXISTS attention_sessions (
-            id VARCHAR PRIMARY KEY,
-            reader VARCHAR NOT NULL,
-            post_id VARCHAR NOT NULL,
-            duration_ms BIGINT NOT NULL,
-            reward BIGINT NOT NULL,
-            claimed BOOLEAN NOT NULL DEFAULT FALSE,
-            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            FOREIGN KEY (reader) REFERENCES profiles(address),
-            FOREIGN KEY (post_id) REFERENCES posts(id)
-        );
-        
-        CREATE TABLE IF NOT EXISTS feed_rankings (
-            post_id VARCHAR PRIMARY KEY,
-            score DECIMAL(10,6) NOT NULL,
-            level_weight DECIMAL(10,6),
-            reputation_weight DECIMAL(10,6),
-            attention_weight DECIMAL(10,6),
-            trend_weight DECIMAL(10,6),
-            computed_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            FOREIGN KEY (post_id) REFERENCES posts(id)
-        );
-        "#
-    )
-    .execute(&pool)
-    .await?;
+    // Tables already exist in suiter.db - just verify connection
+    let _result = sqlx::query("SELECT COUNT(*) FROM profiles")
+        .fetch_one(&pool)
+        .await;
+    
+    match _result {
+        Ok(_) => info!("Database tables verified"),
+        Err(_) => {
+            info!("Tables not found - they should be created via migrations");
+        }
+    }
 
-    info!("Database migrations completed");
+    info!("Database initialized");
 
     // Initialize indexer components
-    let indexer = sui_indexer::SuiIndexer::new(sui_rpc_url, pool.clone());
+    let indexer = sui_indexer::SuiIndexer::new(sui_rpc_url.clone(), pool.clone());
     let ranker = feed_ranker::FeedRanker::new(pool.clone());
 
     // Start indexer task

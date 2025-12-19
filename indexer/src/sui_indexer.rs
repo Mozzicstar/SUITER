@@ -1,5 +1,5 @@
 use anyhow::Result;
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use tracing::info;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -8,11 +8,11 @@ use tokio::time::sleep;
 /// Listens to post creation, attention sessions, and reputation changes
 pub struct SuiIndexer {
     rpc_url: String,
-    pool: PgPool,
+    pool: SqlitePool,
 }
 
 impl SuiIndexer {
-    pub fn new(rpc_url: String, pool: PgPool) -> Self {
+    pub fn new(rpc_url: String, pool: SqlitePool) -> Self {
         SuiIndexer { rpc_url, pool }
     }
 

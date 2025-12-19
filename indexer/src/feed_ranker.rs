@@ -1,5 +1,5 @@
 use anyhow::Result;
-use sqlx::PgPool;
+use sqlx::{SqlitePool, Row};
 use tracing::info;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -13,11 +13,11 @@ use tokio::time::sleep;
 /// - V: Attention velocity
 /// - T: Trend score (recent attention spike)
 pub struct FeedRanker {
-    pool: PgPool,
+    pool: SqlitePool,
 }
 
 impl FeedRanker {
-    pub fn new(pool: PgPool) -> Self {
+    pub fn new(pool: SqlitePool) -> Self {
         FeedRanker { pool }
     }
 
@@ -39,28 +39,30 @@ impl FeedRanker {
 
         // Formula: score = 0.3*L + 0.2*R + 0.3*V + 0.2*T
         let query = r#"
-            INSERT INTO feed_rankings (post_id, score, level_weight, reputation_weight, attention_weight, trend_weight)
+            INSERT INTO feed_rankings (id, post_id, score, level_score, reputation_score, attention_score, time_score, calculated_at)
             SELECT
+                'fr_' || p.id,
                 p.id,
                 (
-                    0.3 * (p.level::DECIMAL / 5.0) +
-                    0.2 * (author_rep.reputation::DECIMAL / 100000.0) +
-                    0.3 * (p.attention_accumulated::DECIMAL / 100000.0) +
-                    0.2 * (CASE WHEN p.created_at > NOW() - INTERVAL '1 hour' THEN 1.0 ELSE 0.5 END)
+                    0.3 * (CAST(p.level AS REAL) / 5.0) +
+                    0.2 * (CAST(COALESCE(author_rep.reputation, 50) AS REAL) / 100000.0) +
+                    0.3 * (CAST(p.attention_accumulated AS REAL) / 100000.0) +
+                    0.2 * (CASE WHEN p.created_at > datetime('now', '-1 hour') THEN 1.0 ELSE 0.5 END)
                 ) as final_score,
-                0.3 * (p.level::DECIMAL / 5.0),
-                0.2 * (author_rep.reputation::DECIMAL / 100000.0),
-                0.3 * (p.attention_accumulated::DECIMAL / 100000.0),
-                0.2 * (CASE WHEN p.created_at > NOW() - INTERVAL '1 hour' THEN 1.0 ELSE 0.5 END)
+                0.3 * (CAST(p.level AS REAL) / 5.0),
+                0.2 * (CAST(COALESCE(author_rep.reputation, 50) AS REAL) / 100000.0),
+                0.3 * (CAST(p.attention_accumulated AS REAL) / 100000.0),
+                0.2 * (CASE WHEN p.created_at > datetime('now', '-1 hour') THEN 1.0 ELSE 0.5 END),
+                CAST(strftime('%s', 'now') AS INTEGER)
             FROM posts p
             LEFT JOIN profiles author_rep ON p.author = author_rep.address
-            ON CONFLICT (post_id) DO UPDATE SET
+            ON CONFLICT (id) DO UPDATE SET
                 score = EXCLUDED.score,
-                level_weight = EXCLUDED.level_weight,
-                reputation_weight = EXCLUDED.reputation_weight,
-                attention_weight = EXCLUDED.attention_weight,
-                trend_weight = EXCLUDED.trend_weight,
-                computed_at = NOW()
+                level_score = EXCLUDED.level_score,
+                reputation_score = EXCLUDED.reputation_score,
+                attention_score = EXCLUDED.attention_score,
+                time_score = EXCLUDED.time_score,
+                calculated_at = EXCLUDED.calculated_at
         "#;
 
         sqlx::query(query).execute(&self.pool).await?;
@@ -85,8 +87,8 @@ impl FeedRanker {
 
         Ok(rows.into_iter().map(|row| {
             (
-                row.get::<String, _>("post_id"),
-                row.get::<f64, _>("score"),
+                row.get::<String, _>(0),
+                row.get::<f64, _>(1),
             )
         }).collect())
     }

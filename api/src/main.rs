@@ -6,7 +6,7 @@ use axum::{
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use std::sync::Arc;
 use tower_http::cors::CorsLayer;
 use tracing::info;
@@ -16,7 +16,7 @@ mod models;
 
 /// Application state
 pub struct AppState {
-    pool: PgPool,
+    pool: SqlitePool,
 }
 
 #[tokio::main]
@@ -33,7 +33,7 @@ async fn main() {
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     // Setup database
-    let pool = sqlx::postgres::PgPoolOptions::new()
+    let pool = sqlx::sqlite::SqlitePoolOptions::new()
         .max_connections(10)
         .connect(&database_url)
         .await
