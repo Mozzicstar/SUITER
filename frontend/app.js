@@ -223,10 +223,15 @@ function renderPosts() {
                     <div class="post-date">${formatDate(post.created_at)}</div>
                 </div>
             </div>
-            <p class="post-content">${escapeHtml(post.content_hash || post.content || '')}</p>
+            <p class="post-content">${escapeHtml(post.content || '')}</p>
+            <div class="post-engagement">
+                <span>❤️ ${post.likes || 0}</span>
+                <span>💬 ${post.comments || 0}</span>
+                <span>🔁 ${post.reposts || 0}</span>
+                <span>👁️ ${post.attention_accumulated || 0}</span>
+            </div>
             <div class="post-footer">
                 <span class="post-badge post-badge-level">⭐ Level ${post.level || 1}</span>
-                <span class="post-badge post-badge-attention">👁️ ${post.attention_accumulated || 0}</span>
             </div>
         </article>
     `).join('');

@@ -19,48 +19,18 @@ import hashlib
 DB_PATH = "/tmp/suiter.db"
 DATA_DIR = Path(DB_PATH).parent
 
-# Sample data
+# Sample data — slightly richer content and realistic timestamps
 SAMPLE_POSTS = [
-    {
-        "author": "Alice",
-        "content": "Just discovered the future of decentralized social networks! #Web3 #SUITER"
-    },
-    {
-        "author": "Bob",
-        "content": "Truth and transparency should be the foundation of all digital platforms. Excited about this project!"
-    },
-    {
-        "author": "Charlie",
-        "content": "The ability to verify information authenticity is game-changing. SUITER is onto something big."
-    },
-    {
-        "author": "Diana",
-        "content": "Love how SUITER combines blockchain with social impact. The attention mechanism is brilliant! 🚀"
-    },
-    {
-        "author": "Eve",
-        "content": "Finally a platform where quality content is rewarded. No more algorithmic manipulation!"
-    },
-    {
-        "author": "Frank",
-        "content": "The Move smart contracts powering SUITER are incredibly elegant. Impressive engineering!"
-    },
-    {
-        "author": "Grace",
-        "content": "This is what decentralized social media should look like. Count me in! 💪"
-    },
-    {
-        "author": "Henry",
-        "content": "The reputation system is fair and transparent. Finally platforms care about truth!"
-    },
-    {
-        "author": "Ivy",
-        "content": "Joined SUITER today and I'm already seeing high-quality discussions. This is refreshing!"
-    },
-    {
-        "author": "Jack",
-        "content": "The UI is clean, the performance is snappy. Great work on making Web3 UX actually usable!"
-    },
+    {"author": "Alice", "content": "Just discovered the future of decentralized social networks! #Web3 #SUITER"},
+    {"author": "Bob", "content": "Truth and transparency should be the foundation of all digital platforms. Excited about this project!"},
+    {"author": "Charlie", "content": "The ability to verify information authenticity is game-changing. SUITER is onto something big."},
+    {"author": "Diana", "content": "Love how SUITER combines blockchain with social impact. The attention mechanism is brilliant! 🚀"},
+    {"author": "Eve", "content": "Finally a platform where quality content is rewarded. No more algorithmic manipulation!"},
+    {"author": "Frank", "content": "The Move smart contracts powering SUITER are incredibly elegant. Impressive engineering!"},
+    {"author": "Grace", "content": "This is what decentralized social media should look like. Count me in! 💪"},
+    {"author": "Henry", "content": "The reputation system is fair and transparent. Finally platforms care about truth!"},
+    {"author": "Ivy", "content": "Joined SUITER today and I'm already seeing high-quality discussions. This is refreshing!"},
+    {"author": "Jack", "content": "The UI is clean, the performance is snappy. Great work on making Web3 UX actually usable!"},
 ]
 
 def init_db():
@@ -82,7 +52,10 @@ def init_db():
             created_at TIMESTAMP,
             updated_at TIMESTAMP,
             attention_accumulated INTEGER DEFAULT 0,
-            level INTEGER DEFAULT 1
+            level INTEGER DEFAULT 1,
+            likes INTEGER DEFAULT 0,
+            comments INTEGER DEFAULT 0,
+            reposts INTEGER DEFAULT 0
         )
     ''')
     
@@ -106,48 +79,62 @@ def init_db():
         )
     ''')
     
-    # Insert sample posts
+    # Insert sample posts (compute attention based on recency and content quality)
     now = datetime.now()
     for i, sample in enumerate(SAMPLE_POSTS):
         post_id = str(uuid.uuid4())
         author = sample["author"]
         content = sample["content"]
         content_hash = hashlib.md5(content.encode()).hexdigest()[:16]
-        created_at = (now - timedelta(minutes=random.randint(1, 500))).isoformat()
-        attention = random.randint(5, 500)
-        level = random.randint(1, 5)
-        
+        # space posts across the last 24 hours
+        minutes_ago = (i * 60) + random.randint(5, 120)
+        created_at_dt = now - timedelta(minutes=minutes_ago)
+        created_at = created_at_dt.isoformat()
+        # attention decreases with age but increases with content length
+        length_factor = max(1, min(3, len(content) // 40))
+        age_factor = max(1, 24*60 / (minutes_ago + 1))
+        attention = int(50 * length_factor * min(age_factor, 10))
+        attention = max(1, min(attention, 1000))
+        level = 1 + min(4, length_factor)
+
+        # Simple engagement metrics derived from attention
+        likes = int(attention * random.uniform(0.1, 0.6))
+        comments = random.randint(0, max(0, likes // 4))
+        reposts = random.randint(0, max(0, likes // 6))
+
         cursor.execute('''
-            INSERT INTO posts (id, author, content, content_hash, created_at, updated_at, attention_accumulated, level)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (post_id, author, content, content_hash, created_at, created_at, attention, level))
-        
+            INSERT INTO posts (id, author, content, content_hash, created_at, updated_at, attention_accumulated, level, likes, comments, reposts)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (post_id, author, content, content_hash, created_at, created_at, attention, level, likes, comments, reposts))
+
         # Create or update profile
         profile_id = str(uuid.uuid4())
-        reputation = random.randint(50, 1000)
-        profile_attention = attention * random.randint(2, 5)
-        
+        reputation = 100 + attention * random.randint(1, 5)
+        profile_attention = attention * random.randint(2, 6)
+
         cursor.execute('''
             INSERT OR IGNORE INTO profiles (id, author, reputation, attention, created_at)
             VALUES (?, ?, ?, ?, ?)
         ''', (profile_id, author, reputation, profile_attention, created_at))
     
-    # Insert rankings
+    # Compute rankings from profiles (score by reputation + attention)
+    cursor.execute('SELECT author, reputation, attention FROM profiles')
+    rows = cursor.fetchall()
     authors_data = []
-    for sample in SAMPLE_POSTS:
+    for row in rows:
         authors_data.append({
-            "author": sample["author"],
-            "score": random.randint(500, 5000)
+            'author': row[0],
+            'score': (row[1] or 0) + (row[2] or 0)
         })
-    
-    authors_data.sort(key=lambda x: x["score"], reverse=True)
-    
-    for i, author_data in enumerate(authors_data[:10]):
+
+    authors_data.sort(key=lambda x: x['score'], reverse=True)
+
+    for i, author_data in enumerate(authors_data[:20]):
         ranking_id = str(uuid.uuid4())
         cursor.execute('''
             INSERT INTO rankings (id, author, profile_name, score, created_at)
             VALUES (?, ?, ?, ?, ?)
-        ''', (ranking_id, author_data["author"], author_data["author"], author_data["score"], now.isoformat()))
+        ''', (ranking_id, author_data['author'], author_data['author'], author_data['score'], now.isoformat()))
     
     conn.commit()
     conn.close()
@@ -260,7 +247,7 @@ class APIHandler(BaseHTTPRequestHandler):
         
         cursor.execute('''
             SELECT id, author, content, content_hash, created_at, 
-                   attention_accumulated, level
+                   attention_accumulated, level, likes, comments, reposts
             FROM posts
             ORDER BY created_at DESC
             LIMIT 100
@@ -280,7 +267,7 @@ class APIHandler(BaseHTTPRequestHandler):
         
         cursor.execute('''
             SELECT id, author, content, content_hash, created_at,
-                   attention_accumulated, level
+                   attention_accumulated, level, likes, comments, reposts
             FROM posts
             WHERE id = ?
         ''', (post_id,))
@@ -304,24 +291,38 @@ class APIHandler(BaseHTTPRequestHandler):
         
         post_id = str(uuid.uuid4())
         content_hash = hashlib.md5(content.encode()).hexdigest()[:16]
-        now = datetime.now().isoformat()
-        attention = random.randint(0, 50)
-        level = 1
-        
+        now_dt = datetime.now()
+        now = now_dt.isoformat()
+
+        # Compute sensible attention and derived metrics from content quality
+        length_factor = max(1, min(3, len(content) // 40))
+        attention = int(20 * length_factor * random.uniform(1.0, 2.5))
+        attention = max(1, attention)
+        level = 1 + min(4, length_factor)
+        likes = int(attention * random.uniform(0.1, 0.6))
+        comments = random.randint(0, max(0, likes // 4))
+        reposts = random.randint(0, max(0, likes // 6))
+
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         
         try:
             cursor.execute('''
-                INSERT INTO posts (id, author, content, content_hash, created_at, updated_at, attention_accumulated, level)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (post_id, author, content, content_hash, now, now, attention, level))
+                INSERT INTO posts (id, author, content, content_hash, created_at, updated_at, attention_accumulated, level, likes, comments, reposts)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (post_id, author, content, content_hash, now, now, attention, level, likes, comments, reposts))
             
-            # Update or create profile
-            cursor.execute('''
-                INSERT OR IGNORE INTO profiles (id, author, reputation, attention, created_at)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (str(uuid.uuid4()), author, random.randint(10, 100), random.randint(0, 200), now))
+            # Update or create profile: make reputation change meaningful
+            cursor.execute('SELECT id, reputation, attention FROM profiles WHERE author = ?', (author,))
+            row = cursor.fetchone()
+            if row:
+                # row is tuple (id, reputation, attention)
+                new_reputation = (row[1] or 0) + random.randint(1, 10)
+                new_attention = (row[2] or 0) + attention
+                cursor.execute('UPDATE profiles SET reputation = ?, attention = ? WHERE author = ?', (new_reputation, new_attention, author))
+            else:
+                cursor.execute('INSERT INTO profiles (id, author, reputation, attention, created_at) VALUES (?, ?, ?, ?, ?)',
+                               (str(uuid.uuid4()), author, 50 + random.randint(0, 100), attention, now))
             
             conn.commit()
             
@@ -332,7 +333,10 @@ class APIHandler(BaseHTTPRequestHandler):
                 'content_hash': content_hash,
                 'created_at': now,
                 'attention_accumulated': attention,
-                'level': level
+                'level': level,
+                'likes': likes,
+                'comments': comments,
+                'reposts': reposts
             }).encode())
         except Exception as e:
             conn.rollback()
