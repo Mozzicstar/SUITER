@@ -135,6 +135,17 @@ async function fetchPosts() {
         return data;
     } catch (error) {
         console.error('❌ Error fetching posts:', error);
+        // Fallback to local mock file (useful when hosted on GitHub Pages)
+        try {
+            const mockResp = await fetch('/mock/posts.json');
+            if (mockResp.ok) {
+                const mockData = await mockResp.json();
+                console.log('✓ Loaded posts from local mock');
+                return mockData;
+            }
+        } catch (e) {
+            // ignore
+        }
         return [];
     }
 }
@@ -147,6 +158,17 @@ async function fetchRankings() {
         return data;
     } catch (error) {
         console.error('❌ Error fetching rankings:', error);
+        // Fallback to local mock file (useful when hosted on GitHub Pages)
+        try {
+            const mockResp = await fetch('/mock/rankings.json');
+            if (mockResp.ok) {
+                const mockData = await mockResp.json();
+                console.log('✓ Loaded rankings from local mock');
+                return mockData;
+            }
+        } catch (e) {
+            // ignore
+        }
         return [];
     }
 }
@@ -215,11 +237,11 @@ function renderPosts() {
     }
 
     postsContainer.innerHTML = posts.map(post => `
-        <article class="post-card">
+        <article class="post-card" id="post-${post.id}" data-post-id="${post.id}">
             <div class="post-header">
                 <div class="post-avatar">${getInitial(post.author)}</div>
                 <div class="post-meta">
-                    <div class="post-author" title="${post.author || 'anonymous'}">${post.author || 'anonymous'}</div>
+                    <div class="post-author" title="${escapeHtml(post.author || 'anonymous')}">${escapeHtml(post.author || 'anonymous')}</div>
                     <div class="post-date">${formatDate(post.created_at)}</div>
                 </div>
             </div>
@@ -271,10 +293,26 @@ function renderTopPostsSidebar() {
     }
 
     topPostsSidebar.innerHTML = topPosts.map(post => `
-        <div class="top-post-item" title="${post.author || 'anonymous'}: ${post.content_hash || ''}">
-            ${post.author || 'anonymous'}: ${post.content_hash || ''}
+        <div class="top-post-item" data-post-id="${post.id}" title="${escapeHtml(post.content || '')}">
+            <div class="tp-author" style="font-weight:600; color:#fff;">${escapeHtml(post.author || 'anonymous')}</div>
+            <div class="tp-snippet" style="font-size:0.85rem; color:#cbd5e1; margin-top:0.25rem;">${escapeHtml((post.content || '').slice(0, 80))}${(post.content || '').length > 80 ? '…' : ''}</div>
         </div>
     `).join('');
+
+    // Attach click handlers to jump to post in feed
+    topPostsSidebar.querySelectorAll('.top-post-item').forEach(el => {
+        el.addEventListener('click', () => {
+            const pid = el.getAttribute('data-post-id');
+            const target = document.getElementById('post-' + pid);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('highlight');
+                setTimeout(() => target.classList.remove('highlight'), 2000);
+            } else {
+                showToast('Post not found in feed. It may have been removed.', 'info');
+            }
+        });
+    });
 }
 
 // Handle Submit Post

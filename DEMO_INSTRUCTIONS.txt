@@ -1,0 +1,57 @@
+SUITER Demo Instructions
+
+1) Start services
+
+- API (mock server):
+  In a terminal run:
+    python3 api_mock.py
+  This initializes the sample DB and starts the API on http://localhost:3000
+
+- Frontend (static):
+  In a second terminal run:
+    ./frontend/server.sh 8080
+  Then open http://localhost:8080 in your browser
+
+- Optional: Live demo on GitHub Pages
+  Visit:
+    https://Mozzicstar.github.io/SUITER
+  This hosted site uses embedded mock data so you can view the demo without running the API locally.
+
+2) Walkthrough script (what to show and where to click)
+
+- Landing view:
+  • Point out the header and the LIVE status badge.
+  • Show the Network stats widget: Total Posts and Ranked (sidebar).
+
+- Top Trending (sidebar):
+  • Explain it displays **author + short content snippet** for each trending post.
+  • Click a top-post item — the feed will automatically scroll to the corresponding post and it will be highlighted briefly. Demonstrate click → scroll → highlight.
+
+- Feed (main area):
+  • Show posts (author, human-friendly timestamp, content, engagement numbers).
+  • Point out the level/reputation badge and attention metric.
+
+- Rankings tab:
+  • Click the 🏆 Rankings tab and explain how profiles are ranked (score = reputation + attention in the mock).
+
+- Create a post (live demo):
+  • In Share Truth form (sidebar) set Author (optional) and add content in "What's on your mind?".
+  • Click **Post** (or press Ctrl+Enter) to submit. Mention the toast notification (success/failure).
+  • The new post should appear at the top of the feed after submission.
+
+- Debug panel (optional):
+  • Open bottom-right debug panel to show real-time log messages for API fetch attempts and actions.
+
+3) Talking points
+
+- The mock server uses realistic sample posts and derives engagement metrics to look plausible.
+- The Top Trending list is now readable and actionable (click → navigate to post) for demos.
+- Creating a post updates the feed and profiles to show changes in the rankings and stats.
+
+4) Optional follow-ups to enhance the demo
+
+- Add a detailed post modal when clicking a top post (show full text, comments, and share options).
+- Add images or embeds to posts to demonstrate richer content.
+- Make snippet generation smarter (highlight important sentences or keywords).
+
+-- End of instructions --

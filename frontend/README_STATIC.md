@@ -44,6 +44,13 @@ Any HTTP server can serve the files. Point it to the `frontend` directory.
 
 Then visit: `http://localhost:8080`
 
+### Live demo on GitHub Pages ✅
+We also deploy the static frontend to GitHub Pages using embedded mock data. Visit:
+
+  https://Mozzicstar.github.io/SUITER
+
+This site uses the files in `frontend/` and the bundled `frontend/mock/*.json` data so it works without a running API server.
+
 ## Configuration
 
 The frontend expects the API server to be available at:
