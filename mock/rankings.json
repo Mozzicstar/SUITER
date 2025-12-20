@@ -19,5 +19,75 @@
     "profile_name": "Eve",
     "score": 180,
     "created_at": "2025-12-20T08:30:00"
+  },
+  {
+    "id": "r4",
+    "author": "Judy",
+    "profile_name": "Judy",
+    "score": 220,
+    "created_at": "2025-12-19T20:15:00"
+  },
+  {
+    "id": "r5",
+    "author": "Laura",
+    "profile_name": "Laura",
+    "score": 260,
+    "created_at": "2025-12-19T18:50:00"
+  },
+  {
+    "id": "r6",
+    "author": "Frank",
+    "profile_name": "Frank",
+    "score": 120,
+    "created_at": "2025-12-20T11:20:00"
+  },
+  {
+    "id": "r7",
+    "author": "Grace",
+    "profile_name": "Grace",
+    "score": 150,
+    "created_at": "2025-12-20T11:50:00"
+  },
+  {
+    "id": "r8",
+    "author": "Kyle",
+    "profile_name": "Kyle",
+    "score": 90,
+    "created_at": "2025-12-20T13:05:00"
+  },
+  {
+    "id": "r9",
+    "author": "Zoë🌟",
+    "profile_name": "Zoë🌟",
+    "score": 999999,
+    "created_at": "2025-12-31T23:59:59"
+  },
+  {
+    "id": "r10",
+    "author": "NegativeNancy",
+    "profile_name": "NegativeNancy",
+    "score": -50,
+    "created_at": "2026-01-01T00:00:00"
+  },
+  {
+    "id": "r11",
+    "author": "TieA",
+    "profile_name": "TieA",
+    "score": 150,
+    "created_at": "2025-12-20T11:52:00"
+  },
+  {
+    "id": "r12",
+    "author": "TieB",
+    "profile_name": "TieB",
+    "score": 150,
+    "created_at": "2025-12-20T11:53:00"
+  },
+  {
+    "id": "r13",
+    "author": "OldTimer",
+    "profile_name": "OldTimer",
+    "score": 10,
+    "created_at": "1970-01-01T00:00:00"
   }
 ]
