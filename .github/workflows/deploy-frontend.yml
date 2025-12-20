@@ -7,7 +7,7 @@ on:
 
 # Ensure the runner has permission to publish Pages
 permissions:
-  contents: read
+  contents: write
   pages: write
 
 jobs:
