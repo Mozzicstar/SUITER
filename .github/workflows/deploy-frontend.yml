@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+# Ensure the runner has permission to publish Pages
+permissions:
+  contents: read
+  pages: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
