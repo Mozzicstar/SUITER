@@ -1,3 +1,4 @@
+jobs:
 name: Deploy Frontend to GitHub Pages
 
 on:
@@ -5,10 +6,11 @@ on:
     branches:
       - main
 
-# Ensure the runner has permission to publish Pages
+# Use Pages actions to publish the `frontend/` static site
 permissions:
-  contents: write
+  contents: read
   pages: write
+  id-token: write
 
 jobs:
   deploy:
@@ -18,9 +20,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy `frontend/` to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload frontend artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend
-          publish_branch: gh-pages
+          path: ./frontend
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
