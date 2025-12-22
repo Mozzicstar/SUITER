@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "outputDirectory": "frontend",
   "buildCommand": "echo 'No build needed - static frontend'",
   "public": true,
   "cleanUrls": true,
