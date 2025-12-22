@@ -1,0 +1,387 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                 SUITER FRONTEND - VERCEL DEPLOYMENT GUIDE                   ║
+║                                                                              ║
+║  Complete step-by-step instructions to deploy SUITER frontend to Vercel     ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 1: PRE-DEPLOYMENT CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+Before deploying to Vercel, verify you have:
+
+✓ GitHub Account (to connect repository)
+✓ Vercel Account (free at vercel.com)
+✓ Git repository pushed to GitHub with all latest changes
+✓ Frontend files in /frontend directory:
+  • index.html
+  • app.js
+  • styles.css
+  • mock/ (with posts.json and rankings.json)
+
+✓ Configuration files in root directory:
+  • vercel.json (Vercel config - already created)
+  • .vercelignore (ignore patterns - already created)
+
+✓ Backend API running (or accessible URL):
+  Option A: Local API on your machine (http://localhost:3000)
+  Option B: Deployed API server (e.g., Railway, Heroku, etc.)
+  Option C: Use mock data only (no backend needed)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 2: DEPLOYMENT METHODS
+═══════════════════════════════════════════════════════════════════════════════
+
+Choose ONE deployment method below:
+
+────────────────────────────────────────────────────────────────────────────
+METHOD A: Deploy via GitHub (Recommended - Easiest)
+────────────────────────────────────────────────────────────────────────────
+
+Step 1: Push code to GitHub
+  $ git add .
+  $ git commit -m "Prepare for Vercel deployment"
+  $ git push origin main
+
+Step 2: Go to https://vercel.com/new
+  • Click "New Project"
+  • Select "Import Git Repository"
+  • Search for "SUITER" and select your repo
+  • Click "Import"
+
+Step 3: Configure Project Settings
+  Framework Preset: "Other" (static site)
+  Build Command: Leave empty or set to "npm run build"
+  Output Directory: "frontend"
+  Root Directory: (leave as default "/")
+  Environment Variables: (see PART 4 below)
+
+Step 4: Click "Deploy"
+  ✓ Vercel will automatically deploy when you push to GitHub
+  ✓ Each commit triggers a new deployment
+  ✓ Live preview links for all branches
+
+────────────────────────────────────────────────────────────────────────────
+METHOD B: Deploy via Vercel CLI (More Control)
+────────────────────────────────────────────────────────────────────────────
+
+Step 1: Install Vercel CLI
+  $ npm install -g vercel
+
+Step 2: Login to Vercel
+  $ vercel login
+  (Opens browser to authenticate)
+
+Step 3: Deploy from project root
+  $ cd /workspaces/SUITER
+  $ vercel --prod
+
+Step 4: Follow prompts:
+  ? Set up and deploy "~/SUITER"? [Y/n] → Y
+  ? Which scope do you want to deploy to? → Select your username
+  ? Link to existing project? [y/N] → N (first time) or Y (if redeploying)
+  ? What's your project's name? → SUITER
+  ? In which directory is your code? → ./frontend
+  ? Want to modify these settings? [y/N] → N
+
+Step 5: Done!
+  ✓ Your frontend is live at https://suiter-xxxxx.vercel.app
+  ✓ Copy this URL for your API configuration
+
+
+════════════════════════════════════════════════════════════════════════════════
+PART 3: POST-DEPLOYMENT SETUP (CRITICAL!)
+════════════════════════════════════════════════════════════════════════════════
+
+After deploying to Vercel, you MUST configure the backend API connection.
+
+OPTION A: Backend on Your Local Machine
+────────────────────────────────────────
+
+If your API is running locally (http://localhost:3000):
+
+1. Install ngrok (exposes local server to internet):
+   $ npm install -g ngrok
+   
+2. Expose your local API to internet:
+   $ ngrok http 3000
+   
+   Output will show:
+   ┌─────────────────────────────┐
+   │ Forwarding  https://xxxx.ngrok.io → http://localhost:3000
+   └─────────────────────────────┘
+   
+   Copy the ngrok URL: https://xxxx.ngrok.io
+
+3. Add to Vercel Environment Variables (see PART 4)
+   NEXT_PUBLIC_API_URL = https://xxxx.ngrok.io
+
+4. Frontend will now make requests to your local API through ngrok
+
+
+OPTION B: Backend on Cloud Server (Recommended)
+─────────────────────────────────────────────────
+
+Deploy your API server to a cloud provider:
+
+Recommended platforms:
+• Railway.app (simplest for Rust/Python)
+• Heroku (deprecated but still works)
+• DigitalOcean App Platform
+• AWS Lambda
+• Google Cloud Run
+
+Example: Deploy API to Railway.app
+  1. Go to https://railway.app
+  2. Create account, select "New Project"
+  3. Select "Deploy from GitHub"
+  4. Choose your SUITER repo
+  5. Select the "api" folder as root directory
+  6. Add environment: PORT = 3000
+  7. Click "Deploy"
+  8. Get the URL: https://suiter-api.up.railway.app
+  9. Add to Vercel Environment Variables (PART 4)
+
+
+OPTION C: No Backend (Use Mock Data Only)
+───────────────────────────────────────────
+
+If you don't want to run a backend:
+
+1. Frontend already loads from /frontend/mock/:
+   • posts.json
+   • rankings.json
+
+2. Post creation will show success but won't persist (browser demo only)
+
+3. Environment variable not needed
+   Leave NEXT_PUBLIC_API_URL empty
+
+
+════════════════════════════════════════════════════════════════════════════════
+PART 4: CONFIGURE ENVIRONMENT VARIABLES
+════════════════════════════════════════════════════════════════════════════════
+
+Set environment variables in Vercel Dashboard:
+
+1. Go to https://vercel.com/dashboard
+2. Select your SUITER project
+3. Click "Settings" → "Environment Variables"
+4. Add NEW variable:
+   
+   Name:  NEXT_PUBLIC_API_URL
+   Value: (depends on your backend)
+   
+   Examples:
+   • Local API via ngrok: https://xxxx.ngrok.io
+   • Railway deployment: https://suiter-api.up.railway.app
+   • Local machine: http://localhost:3000 (only works from your computer)
+
+5. Click "Save"
+6. Redeploy: Go to "Deployments" tab → select latest → click "Redeploy"
+
+
+════════════════════════════════════════════════════════════════════════════════
+PART 5: VERIFY DEPLOYMENT
+════════════════════════════════════════════════════════════════════════════════
+
+Check that your deployment works:
+
+1. Open your Vercel URL: https://suiter-xxxxx.vercel.app
+
+2. Check Network Status:
+   ✓ LIVE badge should be GREEN if API is connected
+   ✗ LIVE badge RED means API is unreachable
+
+3. Test Features:
+   ✓ Posts load in feed
+   ✓ Rankings tab shows profiles
+   ✓ Create a post (check for success notification)
+   ✓ New posts appear at top of feed
+
+4. Open Browser Console (F12):
+   • Check for errors
+   • Look for API request logs
+   • Verify responses contain data
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 6: DOMAIN CONFIGURATION (OPTIONAL)
+═══════════════════════════════════════════════════════════════════════════════
+
+To use a custom domain instead of vercel.app:
+
+1. Purchase domain (e.g., suiter.io from GoDaddy, Namecheap)
+
+2. In Vercel Dashboard:
+   • Project Settings → Domains
+   • Add domain: suiter.io
+   • Follow instructions to update DNS records
+   • Wait 24-48 hours for propagation
+
+3. Verify:
+   $ dig suiter.io
+   (should point to Vercel's nameservers)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 7: GITHUB INTEGRATION & AUTO-DEPLOYMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+After initial deployment, Vercel auto-deploys on push:
+
+Workflow:
+1. Make changes locally
+2. $ git add .
+3. $ git commit -m "Fix UI bug"
+4. $ git push origin main
+5. Vercel automatically deploys (1-2 minutes)
+6. View deployment at Vercel Dashboard
+
+Create Preview Deployments (optional):
+• Push to a feature branch: $ git push origin feature/new-feature
+• Vercel creates a preview: https://suiter-feature-xxxxx.vercel.app
+• Review changes before merging to main
+• Merge to main → production deployment
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 8: TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+Problem: "LIVE badge is RED / API not connected"
+─────────────────────────────────────────────────
+Solution:
+1. Check NEXT_PUBLIC_API_URL is set in Vercel Environment Variables
+2. Verify backend API is running and accessible
+3. Test API directly: curl https://xxxx.ngrok.io/posts
+4. Check browser console (F12 → Console tab) for CORS errors
+5. Redeploy: Vercel Dashboard → Deployments → Latest → Redeploy
+
+Problem: "Posts won't create / Form submission fails"
+─────────────────────────────────────────────────────
+Solution:
+1. Verify POST method is being called (check Network tab in F12)
+2. Check API backend is receiving requests (check server logs)
+3. Verify CORS headers are set correctly on backend
+4. Backend should allow origin: https://suiter-xxxxx.vercel.app
+5. Test POST manually: 
+   curl -X POST https://xxxx.ngrok.io/posts \
+     -H "Content-Type: application/json" \
+     -d '{"author":"Test","content":"Hello"}'
+
+Problem: "CSS/JS files not loading (404 errors)"
+────────────────────────────────────────────────
+Solution:
+1. Verify output directory in vercel.json is correct
+2. Check all files exist in /frontend:
+   $ ls -la /workspaces/SUITER/frontend/
+3. Ensure no hardcoded paths in HTML
+4. Clear browser cache: Ctrl+Shift+Delete
+5. Redeploy: vercel --prod
+
+Problem: "Cold start / slow initial load"
+──────────────────────────────────────────
+Solution:
+1. First load may take 5-10 seconds (Vercel cold start)
+2. Subsequent loads are instant
+3. Use Vercel Analytics to check performance:
+   Vercel Dashboard → Analytics tab
+4. Optimize images/assets if needed
+5. Enable Edge Caching: Settings → Data Caching
+
+Problem: "Environment variables not working"
+──────────────────────────────────────────────
+Solution:
+1. Verify variables are named with NEXT_PUBLIC_ prefix
+   (without prefix = server-only, frontend can't access)
+2. Redeploy after adding variables (critical!)
+3. Clear browser cache after redeployment
+4. Check variable in browser DevTools:
+   console.log(process.env.NEXT_PUBLIC_API_URL)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 9: PRODUCTION CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+Before calling your deployment "ready for production":
+
+✓ Frontend loads without errors
+✓ LIVE badge is green (API connected)
+✓ Posts display in feed
+✓ Rankings tab works
+✓ Can create new posts
+✓ Search/filtering works
+✓ No console errors (F12 → Console)
+✓ Browser test on mobile (responsive design works)
+✓ Test on different browsers (Chrome, Firefox, Safari)
+✓ Check lighthouse score: Vercel Dashboard → Analytics
+✓ Add custom domain (if needed)
+✓ Enable Analytics: Vercel Dashboard → Analytics
+✓ Set up error tracking: (optional - Sentry.io)
+✓ Document API endpoint for future reference
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 10: QUICK REFERENCE - VERCEL CLI COMMANDS
+═══════════════════════════════════════════════════════════════════════════════
+
+$ vercel login                    # Authenticate with Vercel
+$ vercel --prod                   # Deploy to production
+$ vercel --preview                # Deploy to preview (staging)
+$ vercel env pull                 # Download env vars locally
+$ vercel env add VAR_NAME         # Add environment variable
+$ vercel logs                      # View deployment logs
+$ vercel inspect <deployment-id>  # Inspect specific deployment
+$ vercel analytics                # View performance analytics
+$ vercel rollback                 # Rollback to previous deployment
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 11: COMMON QUESTIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+Q: "Is Vercel free?"
+A: Yes! Vercel has a free tier:
+   • Unlimited deployments
+   • Custom domains
+   • SSL/HTTPS included
+   • 100GB bandwidth/month
+   • Perfect for demos and prototypes
+
+Q: "Can I rollback to a previous version?"
+A: Yes! In Vercel Dashboard:
+   • Deployments tab → select previous version → "Rollback"
+   • All versions are preserved with timestamps
+
+Q: "How do I check deployment logs?"
+A: In Vercel Dashboard:
+   • Deployments tab → select deployment → View Logs
+   Or CLI:
+   • $ vercel logs (shows recent logs)
+
+Q: "Can I use this with a custom API?"
+A: Yes! Set NEXT_PUBLIC_API_URL to your API server.
+   Frontend will automatically proxy requests.
+
+Q: "What if I need to update the frontend?"
+A: Just push to GitHub:
+   $ git push origin main
+   Vercel automatically redeploys (1-2 minutes)
+
+Q: "Can I test locally before deploying?"
+A: Yes! Run the frontend locally first:
+   $ ./frontend/server.sh 8080
+   Then open http://localhost:8080
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+-- End of Vercel Deployment Guide --
+Version: 1.0 (Complete Manual Deployment Instructions)
+Last updated: December 2025
+
+For more help: https://vercel.com/docs

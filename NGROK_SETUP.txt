@@ -1,0 +1,206 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║           SUITER + NGROK SETUP FOR VERCEL DEPLOYMENT                        ║
+║                                                                              ║
+║  Expose your local API to the internet for Vercel frontend to access        ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+✓ ngrok is already installed at: /workspaces/SUITER/ngrok
+
+STEP 1: CREATE NGROK ACCOUNT (2 minutes)
+════════════════════════════════════════
+
+1. Go to: https://dashboard.ngrok.com/signup
+2. Sign up with email (free account)
+3. Verify your email
+4. Go to: https://dashboard.ngrok.com/get-started/your-authtoken
+5. Copy your authtoken (starts with ngrok_)
+
+STEP 2: AUTHENTICATE NGROK (30 seconds)
+═════════════════════════════════════════
+
+In terminal, run:
+$ ./ngrok config add-authtoken YOUR_AUTHTOKEN_HERE
+
+Replace YOUR_AUTHTOKEN_HERE with the token from Step 1.
+
+Example:
+$ ./ngrok config add-authtoken ngrok_abcdef123456789
+
+STEP 3: START YOUR API SERVER (5 seconds)
+═══════════════════════════════════════════
+
+Make sure your API is running on port 3000:
+
+Terminal 1:
+$ cd /workspaces/SUITER
+$ python3 api_mock.py
+
+You should see:
+✓ Database initialized...
+✓ Loaded X sample posts
+✓ SUITER API Server started on http://localhost:3000
+
+STEP 4: EXPOSE API WITH NGROK (5 seconds)
+═══════════════════════════════════════════
+
+Terminal 2:
+$ cd /workspaces/SUITER
+$ ./ngrok http 3000
+
+You will see output like:
+
+┌──────────────────────────────────────────────────────────────────┐
+│                           ngrok                                  │
+│                        (Ctrl+C to quit)                          │
+├──────────────────────────────────────────────────────────────────┤
+│ Session Status:                       online                      │
+│ Account:                              your-email@example.com      │
+│ Version:                              3.34.1                      │
+│ Region:                               us (United States)          │
+│ Latency:                              85ms                        │
+│ Web Interface:                        http://127.0.0.1:4040       │
+├──────────────────────────────────────────────────────────────────┤
+│ Forwarding:                           https://xxxx-yyyy.ngrok.io  │
+│ Forwarding:                           http://xxxx-yyyy.ngrok.io   │
+├──────────────────────────────────────────────────────────────────┤
+│ Connections:                          ttl   opn   rt1   rt5   p50 │
+│                                        0     0     0     0     0  │
+└──────────────────────────────────────────────────────────────────┘
+
+✓ Copy the HTTPS URL: https://xxxx-yyyy.ngrok.io
+
+STEP 5: CONFIGURE VERCEL (2 minutes)
+═════════════════════════════════════
+
+Now tell Vercel to use your ngrok URL:
+
+1. Go to https://vercel.com/dashboard
+2. Select your SUITER project
+3. Click "Settings" → "Environment Variables"
+4. Click "Add New"
+   Name:  NEXT_PUBLIC_API_URL
+   Value: https://xxxx-yyyy.ngrok.io  (from Step 4)
+5. Click "Save"
+6. Go to "Deployments" tab
+7. Click on the latest deployment
+8. Click "Redeploy"
+
+STEP 6: TEST YOUR SETUP (1 minute)
+═══════════════════════════════════
+
+1. Wait for redeploy to finish (2-3 minutes)
+2. Open your Vercel URL: https://suiter-xxxxx.vercel.app
+3. Check the LIVE badge - should be GREEN ✓
+4. Create a test post - should work!
+5. Check ngrok logs (Terminal 2) - you should see API requests
+
+If LIVE badge is red:
+- Check ngrok is still running
+- Verify NEXT_PUBLIC_API_URL is correct
+- Check /api/posts is accessible: 
+  $ curl https://xxxx-yyyy.ngrok.io/api/posts
+
+
+═══════════════════════════════════════════════════════════════════
+
+⚠️  IMPORTANT NOTES
+═══════════════════════════════════════════════════════════════════
+
+1. NGROK URL CHANGES EVERY TIME YOU RESTART
+   • If you kill ngrok (Ctrl+C), the URL changes
+   • You must update NEXT_PUBLIC_API_URL in Vercel again
+   • For production, deploy API to a cloud server (Railway, etc)
+
+2. NGROK RATE LIMITS
+   • Free plan: 20 requests/minute (enough for demo)
+   • Paid plan: unlimited (if needed)
+
+3. KEEP NGROK RUNNING
+   • Don't close Terminal 2 with ngrok
+   • Keep it running during the entire demo
+   • If it disconnects, restart it
+
+4. NGROK WEB INTERFACE
+   • Access at: http://127.0.0.1:4040
+   • View all API requests in real-time
+   • Great for debugging!
+
+5. DEMO TIPS
+   • Show judges the ngrok terminal to prove real API calls
+   • Show the ngrok web interface: http://127.0.0.1:4040
+   • Point out request logs for transparency
+
+═══════════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════
+
+Problem: "ngrok says 'authentication failed'"
+─────────────────────────────────────────────
+Fix:
+1. Go to https://dashboard.ngrok.com/get-started/your-authtoken
+2. Copy your authtoken
+3. Run: ./ngrok config add-authtoken YOUR_TOKEN
+4. Then run: ./ngrok http 3000
+
+Problem: "LIVE badge is still RED"
+──────────────────────────────────
+Fix:
+1. Check ngrok is running (Terminal 2 should show the table)
+2. Check NEXT_PUBLIC_API_URL in Vercel Settings (exact URL from ngrok)
+3. Redeploy: Vercel Dashboard → Deployments → Latest → Redeploy
+4. Wait 2-3 minutes for redeploy to finish
+5. Refresh your browser (Ctrl+R) after redeploy
+
+Problem: "Posts won't create"
+────────────────────────────
+Fix:
+1. Check API is still running (Terminal 1)
+2. Check ngrok is still running (Terminal 2)
+3. Test directly: curl https://xxxx-yyyy.ngrok.io/api/posts
+4. Check ngrok web interface: http://127.0.0.1:4040
+5. Look for errors in Terminal 1 (API logs)
+
+Problem: "ngrok suddenly stopped working"
+──────────────────────────────────────────
+Likely causes:
+1. Internet connection dropped
+2. ngrok process crashed
+3. Port 3000 is no longer available
+
+Fix:
+1. Restart API: pkill -f api_mock.py && python3 api_mock.py
+2. Restart ngrok: ./ngrok http 3000
+3. Copy new ngrok URL
+4. Update NEXT_PUBLIC_API_URL in Vercel
+5. Redeploy
+
+
+═══════════════════════════════════════════════════════════════════
+
+QUICK COMMAND REFERENCE
+═════════════════════════════════════════════════════════════════
+
+# First time setup
+$ ./ngrok config add-authtoken YOUR_AUTHTOKEN
+
+# Start API
+$ cd /workspaces/SUITER && python3 api_mock.py
+
+# Expose API with ngrok (in another terminal)
+$ cd /workspaces/SUITER && ./ngrok http 3000
+
+# View ngrok logs/requests
+http://127.0.0.1:4040
+
+# Test API endpoint
+$ curl https://xxxx-yyyy.ngrok.io/api/posts
+
+# Redeploy on Vercel
+Go to: https://vercel.com/dashboard
+Select SUITER → Deployments → Latest → Redeploy
+
+═══════════════════════════════════════════════════════════════════
+
+-- End of ngrok Setup Guide --
+Ready to deploy to Vercel!

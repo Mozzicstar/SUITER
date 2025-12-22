@@ -1,0 +1,25 @@
+{
+  "name": "suiter",
+  "version": "1.0.0",
+  "description": "A decentralized social proof network powered by attention economics on Sui blockchain",
+  "main": "frontend/index.html",
+  "author": "Mozzicstar",
+  "license": "MIT",
+  "scripts": {
+    "start": "./frontend/server.sh 8080",
+    "dev": "./frontend/server.sh 8080",
+    "build": "echo 'No build needed - static frontend'"
+  },
+  "keywords": [
+    "suiter",
+    "social-network",
+    "blockchain",
+    "sui",
+    "reputation",
+    "decentralized",
+    "attention-economy"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

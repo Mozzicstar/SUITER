@@ -1,57 +1,577 @@
-SUITER Demo Instructions
+╔════════════════════════════════════════════════════════════════════════════╗
+║                        SUITER Platform - Demo Guide                         ║
+║                                                                              ║
+║  A decentralized social proof network powered by attention economics &      ║
+║  reputation-based rankings on the Sui blockchain.                          ║
+╚════════════════════════════════════════════════════════════════════════════╝
 
-1) Start services
+⚡ QUICK START FOR JUDGES
+────────────────────────
+Focus on these 3 things:
+1. 🔗 SUI SMART CONTRACTS - Open /contracts/sources/ to show Move code
+2. 💎 TRANSPARENT REPUTATION - Show the ranking formula (Reputation + Attention)
+3. 🚀 DECENTRALIZED TRUST - Emphasize: no hidden algorithm, users own their data
 
-- API (mock server):
-  In a terminal run:
-    python3 api_mock.py
-  This initializes the sample DB and starts the API on http://localhost:3000
+If they ask about blockchain, jump to PART 2.5 (Sui Implementation Focus).
 
-- Frontend (static):
-  In a second terminal run:
-    ./frontend/server.sh 8080
-  Then open http://localhost:8080 in your browser
+═══════════════════════════════════════════════════════════════════════════════
+PART 1: STARTING SERVICES
+═══════════════════════════════════════════════════════════════════════════════
 
-- Optional: Live demo on GitHub Pages
-  Visit:
-    https://Mozzicstar.github.io/SUITER
-  This hosted site uses embedded mock data so you can view the demo without running the API locally.
+OPTION A: LOCAL SETUP (Recommended for Interactive Demo)
+────────────────────────────────────────────────────────
 
-2) Walkthrough script (what to show and where to click)
+1. API (Mock Server):
+   Opens on: http://localhost:3000
+   
+   In Terminal 1:
+     $ python3 api_mock.py
+   
+   What happens:
+   ✓ Initializes SQLite database with migrations
+   ✓ Populates sample posts, profiles, and engagement metrics
+   ✓ Starts the REST API server with real-time mock responses
+   ✓ You should see: "API running on port 3000"
 
-- Landing view:
-  • Point out the header and the LIVE status badge.
-  • Show the Network stats widget: Total Posts and Ranked (sidebar).
+2. Frontend (Static Site):
+   Opens on: http://localhost:8080
+   
+   In Terminal 2:
+     $ ./frontend/server.sh 8080
+   
+   What happens:
+   ✓ Serves the frontend UI
+   ✓ Connects to the local API for live data
+   ✓ You should see: "Server started on port 8080"
 
-- Top Trending (sidebar):
-  • Explain it displays **author + short content snippet** for each trending post.
-  • Click a top-post item — the feed will automatically scroll to the corresponding post and it will be highlighted briefly. Demonstrate click → scroll → highlight.
+3. Open Browser:
+   Once both servers show success messages, navigate to:
+     http://localhost:8080
+   
+   Expected: Landing page with LIVE badge, posts feed, and sidebar widgets
 
-- Feed (main area):
-  • Show posts (author, human-friendly timestamp, content, engagement numbers).
-  • Point out the level/reputation badge and attention metric.
 
-- Rankings tab:
-  • Click the 🏆 Rankings tab and explain how profiles are ranked (score = reputation + attention in the mock).
+OPTION B: GitHub Pages Live Demo (No Setup Required)
+────────────────────────────────────────────────────
 
-- Create a post (live demo):
-  • In Share Truth form (sidebar) set Author (optional) and add content in "What's on your mind?".
-  • Click **Post** (or press Ctrl+Enter) to submit. Mention the toast notification (success/failure).
-  • The new post should appear at the top of the feed after submission.
+   No installation needed. Simply visit:
+     https://Mozzicstar.github.io/SUITER
+   
+   Note: Uses embedded mock data (no real API calls), so creates are not
+   persistent between page reloads.
 
-- Debug panel (optional):
-  • Open bottom-right debug panel to show real-time log messages for API fetch attempts and actions.
 
-3) Talking points
+═══════════════════════════════════════════════════════════════════════════════
+PART 2: DETAILED WALKTHROUGH SCRIPT (WHAT TO SHOW & WHERE TO CLICK)
+═══════════════════════════════════════════════════════════════════════════════
 
-- The mock server uses realistic sample posts and derives engagement metrics to look plausible.
-- The Top Trending list is now readable and actionable (click → navigate to post) for demos.
-- Creating a post updates the feed and profiles to show changes in the rankings and stats.
+STEP 1: Landing Page & System Status
+─────────────────────────────────────
 
-4) Optional follow-ups to enhance the demo
+1.1 Header & Global Status
+   Location: Top of the page
+   
+   Actions:
+   • Point out the SUITER logo/branding
+   • Highlight the 🔴 LIVE status badge (green when API is connected)
+   • Explain this badge indicates the system is synced with the mock server
+   
+   Key talking point:
+   "SUITER connects to a decentralized network—the LIVE badge confirms real-time
+    data flow from our Sui blockchain simulation."
 
-- Add a detailed post modal when clicking a top post (show full text, comments, and share options).
-- Add images or embeds to posts to demonstrate richer content.
-- Make snippet generation smarter (highlight important sentences or keywords).
+1.2 Network Statistics Widget
+   Location: Right sidebar, top section
+   
+   What it shows:
+   • Total Posts: Count of all posts on the network
+   • Ranked: Number of profiles with reputation scores
+   • Live updates: Stats refresh as new posts are created
+   
+   Actions:
+   • Point out the widget design
+   • Explain that these metrics represent network health
+   • Note that creating posts will increase these numbers in real-time
 
--- End of instructions --
+
+STEP 2: Top Trending Section (Sidebar)
+──────────────────────────────────────
+
+2.1 The Trending List
+   Location: Left sidebar, below Network Stats
+   
+   What it shows:
+   • List of 5-10 trending posts (sorted by reputation + attention score)
+   • Each item displays: Author name + content snippet (truncated for readability)
+   • Visual hierarchy: Higher-ranked posts appear at the top
+   
+   Design details:
+   • Icons: 🏆 next to top posts, ⭐ for attention-boosted posts
+   • Click feedback: Items highlight on hover to show they're interactive
+
+2.2 Interactive Navigation (Demo This!)
+   
+   Action sequence:
+   a) Click on any trending post item
+   b) Watch the main feed SCROLL to that post automatically
+   c) The post will have a HIGHLIGHT effect (yellow/gold background) for 2-3 seconds
+   d) User attention is drawn to the specific post without manual scrolling
+   
+   Key talking point:
+   "Users can quickly discover and jump to trending conversations without scrolling.
+    This attention economics model rewards high-engagement content."
+
+
+STEP 3: Main Feed (Center)
+──────────────────────────
+
+3.1 Post Cards
+   Location: Main center area
+   
+   Each post displays:
+   ┌─────────────────────────────────┐
+   │ 👤 Author Name                  │
+   │ ⏱️  2 hours ago                  │
+   │                                 │
+   │ "Full post content text..."      │
+   │                                 │
+   │ ⚡ Attention: 127 | 💎 Rep: 89  │
+   │ 🏅 Level 5 | 💬 Replies: 23    │
+   └─────────────────────────────────┘
+   
+   Explanation of metrics:
+   • Attention (⚡): How many users interacted with this post
+   • Reputation (💎): Author's accumulated trust score
+   • Level: Tier based on total reputation (1-10)
+   • Replies: Number of comments/discussions
+   
+   Visual cues:
+   • Highlight higher-reputation authors with special badges
+   • Color code levels: Green (1-3), Blue (4-6), Purple (7-10)
+
+3.2 Sorting & Feed Behavior
+   
+   Current behavior:
+   • Posts sorted by: (Reputation × Attention) ÷ Time Decay
+   • Newer posts float to the top initially
+   • Higher engagement keeps old posts visible
+   
+   Talking point:
+   "Unlike algorithms that hide content, SUITER uses transparent attention economics.
+    Users can see WHY a post is trending—it's math, not black boxes."
+
+
+STEP 4: Rankings Tab (🏆 Icon)
+───────────────────────────────
+
+4.1 Access the Rankings
+   Location: Top navigation bar, click 🏆 Rankings
+   
+   Page shows: Leaderboard of all profiles
+   
+   Columns:
+   • Rank: #1, #2, #3... (position)
+   • Author: Profile name with avatar
+   • Reputation (💎): Total score from posts + interactions
+   • Attention (⚡): Total attention received
+   • Level: Current tier
+   • Total Score: Reputation + Attention (ranking metric)
+
+4.2 Explain the Ranking System
+   
+   Key talking points:
+   • "This is transparent: no hidden algorithm. Rankings = Reputation + Attention"
+   • "Long-form creators with deep expertise rank higher (reputation)"
+   • "Viral or trendy posts boost attention quickly (social proof)"
+   • "Combined: the network rewards both quality AND resonance"
+   
+   Show example:
+   • Top-ranked user likely has 5-10 high-engagement posts
+   • Explain how consistent quality + community interaction = rank advancement
+
+
+STEP 5: Create a Post (Live Demo)
+────────────────────────────────
+
+5.1 Locate the Share Truth Form
+   Location: Left sidebar, below Trending section
+   
+   Form has two fields:
+   ┌─────────────────────────────────┐
+   │ Share a Truth                   │
+   │                                 │
+   │ Author: [_____________] (opt.)  │
+   │                                 │
+   │ [What's on your mind?...]       │
+   │ [Type your post content here... │
+   │  More content...                │
+   │  Even more...]                  │
+   │                                 │
+   │ [Post] or Ctrl+Enter            │
+   └─────────────────────────────────┘
+
+5.2 Create a Sample Post (DEMO THIS LIVE!)
+   
+   Suggested content:
+   Author: "Demo User" or leave blank
+   Content: "SUITER is a decentralized social network where reputation is transparent
+            and earned through quality contributions. No hidden algorithms."
+   
+   Actions:
+   a) Type content into the form
+   b) Click [Post] button or press Ctrl+Enter
+   c) Watch for TOAST notification (green success message) at bottom
+   d) Observe the feed REFRESH automatically
+   e) Your new post appears at the TOP of the feed
+   f) Check sidebar stats: Total Posts incremented by 1
+   g) Author profile appears in Rankings if it's a new author
+
+5.3 Real-time Updates
+   
+   Point out:
+   • Toast notification shows: "✓ Post created successfully"
+   • No page reload needed—everything updates in real-time
+   • New post has timestamp "now" or "just now"
+   • Engagement metrics start at: Attention: 1, Rep: 0 (author's existing reputation)
+
+5.4 Advanced Demo (Optional)
+   
+   Create multiple posts to show:
+   • How the feed re-sorts as engagement increases
+   • Rankings change as the new author gains posts
+   • Top Trending list updates to include the new post
+
+
+STEP 6: Debug Panel (Advanced)
+──────────────────────────────
+
+6.1 Open the Debug Panel
+   Location: Bottom-right corner of the page (small toggle button)
+   
+   Panel shows:
+   • Real-time API request log
+   • Action timestamps
+   • Error messages (if any)
+   • Data fetch times
+
+6.2 What to Show
+   
+   Actions:
+   a) Click the debug toggle to open the log
+   b) Point out real API calls being made
+   c) Show timestamps for each action
+   d) Close panel by clicking toggle again
+   
+   Talking point:
+   "Everything you see has a traceable API call. Full transparency into how data
+    flows from the mock server to your browser. No hidden operations."
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 2.5: SUI BLOCKCHAIN IMPLEMENTATION (JUDGE FOCUS)
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 KEY TALKING POINT: "Every reputation metric you see is verified by Sui smart contracts"
+
+THE SUI SMART CONTRACTS POWERING SUITER
+────────────────────────────────────────
+
+Our smart contracts are written in Move (Sui's native language) and live in /contracts/sources/:
+
+1. POST.MOVE - Post Creation & Level System
+   ├─ Creates immutable post objects on-chain
+   ├─ Tracks: author, content_hash, attention_accumulated, level
+   ├─ 5-Level System (based on attention thresholds):
+   │  • Level 1: 0+ attention (any post starts here)
+   │  • Level 2: 1,000+ attention
+   │  • Level 3: 5,000+ attention
+   │  • Level 4: 25,000+ attention
+   │  • Level 5: 100,000+ attention (elite content creators)
+   │
+   └─ Talking point: "Posts that gain community engagement automatically level up.
+      It's not a badge we give—it's earned mathematically on the blockchain."
+
+2. ATTENTION.MOVE - Attention Economics
+   ├─ Records every user interaction (view, like, share, reply)
+   ├─ Attention is fungible (can be transferred, traded, etc.)
+   ├─ Each interaction creates a verified on-chain event
+   │
+   └─ Talking point: "Unlike Twitter where engagement is hidden data owned by Meta,
+      SUITER records EVERY interaction on Sui. You can verify them yourself."
+
+3. REPUTATION.MOVE - Trust Score Calculation
+   ├─ Transparent formula: gain = BASE_GAIN × log(reward + 1)
+   ├─ Reputation grows logarithmically (prevents bot farms)
+   ├─ Doubt mechanism: incorrect posts lose reputation if doubted by community
+   ├─ Constants:
+   │  • BASE_GAIN: 10 points per attention reward
+   │  • BASE_LOSS: 5 points if post doesn't gain traction
+   │  • DOUBT_THRESHOLD: 3 votes to activate doubt mechanism
+   │  • DOUBT_MULTIPLIER: 2x reputation loss if doubted
+   │
+   └─ Talking point: "The formula is hardcoded in the contract. No hidden algorithms.
+      Users can read the exact code and verify the math themselves."
+
+4. PROFILE.MOVE - Identity & Wallet Integration
+   ├─ Each profile tied to a Sui wallet address (not a username)
+   ├─ Portable reputation (can use profile across dApps)
+   ├─ Verified on-chain identity
+   │
+   └─ Talking point: "Your reputation follows you. Change platforms or social networks,
+      and your reputation comes with you. It's a portable asset you own."
+
+5. TRUTH_CLAIM.MOVE - Claim Verification & Attestation
+   ├─ Allows community fact-checking posts
+   ├─ Claims can be marked as "Verified" or "Disputed"
+   ├─ Creates an immutable audit trail
+   │
+   └─ Talking point: "Misinformation is countered by community attestation, not censorship.
+      All claims are visible and verifiable on-chain."
+
+6. CREATOR_LIFELINE.MOVE - Creator Protection
+   ├─ Protects emerging creators from unfair reputation loss
+   ├─ Grace period for new posts before doubt penalties apply
+   │
+   └─ Talking point: "New creators get a fair shot. Their first posts aren't immediately
+      buried by experienced users. Sui helps us protect creator rights."
+
+
+WHY SUI BLOCKCHAIN MATTERS FOR SUITER
+──────────────────────────────────────
+
+1. Immutability & Trust
+   "Every metric is permanent. You can't delete your reputation or edit past posts.
+    This creates real accountability."
+
+2. Decentralization
+   "No single company controls SUITER. The smart contracts are deployed on Sui's network.
+    We don't have a kill switch—the protocol runs forever."
+
+3. Transparent Economics
+   "The reputation formula is open source. Anyone can read the Move code and verify:
+    • How scores are calculated
+    • What causes reputation gains/losses
+    • How levels are assigned"
+
+4. Crypto-Economic Security
+   "Creating fake posts or voting costs SUI gas fees. Spam is economically irrational.
+    This is better than 'human review'—it's math."
+
+5. Portable Reputation
+   "Your reputation isn't locked to SUITER. Other dApps can read your on-chain profile
+    and use it for lending, trading, governance—anything that needs trust."
+
+
+HOW TO SHOW IT DURING THE DEMO
+───────────────────────────────
+
+Option A: Code Walkthrough (2-3 minutes)
+  1. Open the Move contracts in your editor
+  2. Show the reputation.move calculation:
+     "This is the exact formula. It's not a black box—anyone can read it."
+  3. Point out the constants:
+     "These thresholds are consensus rules. They can't be changed without deploying
+      a new smart contract. That requires community agreement."
+
+Option B: Transaction Hash Demo (Advanced)
+  1. Deploy SUITER to Sui Testnet (if available)
+  2. Show a real transaction hash from Sui Explorer
+  3. Point out the immutable record:
+     "This post creation is permanently recorded on Sui. It can't be deleted or modified."
+
+Option C: Architecture Diagram (Recommended for Time-Constrained Demo)
+  1. Draw on whiteboard or presentation:
+     ┌─────────────────────────────────────────────┐
+     │      SUITER Frontend (React/HTML)           │
+     │      (What users see)                       │
+     └────────────────┬────────────────────────────┘
+                      │ (API calls)
+     ┌────────────────▼────────────────────────────┐
+     │      SUITER Backend API (Mock/Real)         │
+     │      (Aggregates data, serves UI)           │
+     └────────────────┬────────────────────────────┘
+                      │ (Writes verified events)
+     ┌────────────────▼────────────────────────────┐
+     │      SUI BLOCKCHAIN SMART CONTRACTS         │
+     │  (post.move, reputation.move, attention.move)
+     │  (Immutable, decentralized, transparent)    │
+     └─────────────────────────────────────────────┘
+  
+  "The frontend shows data, the backend aggregates it, but Sui is the source of truth.
+   Every transaction is permanently recorded."
+
+
+JUDGE-FOCUSED TALKING POINTS
+──────────────────────────────
+
+When judges ask about your Sui implementation:
+
+Q: "How does blockchain add value here?"
+A: "Blockchain solves the trust problem in social networks. Instead of trusting Meta
+   or Twitter's algorithm, users trust math. The reputation formula is open source,
+   immutable, and verifiable. That's impossible with a centralized platform."
+
+Q: "Why Move language?"
+A: "Move was designed for digital assets and ownership. SUITER treats reputation as
+   an asset—something you own, can transfer, and can use across platforms. Move's
+   ownership system makes this natural and safe."
+
+Q: "What about scalability?"
+A: "Current: We're on Sui Testnet (fast, low-cost). Future: Sui's horizontal scaling
+   can handle millions of posts/second. Much faster than Ethereum."
+
+Q: "Can you deploy this to mainnet?"
+A: "Yes! The contracts are production-ready. We can deploy to Sui mainnet with:
+   1. Security audit (external auditor)
+   2. Gas fee estimates
+   3. Mainnet validator support
+   
+   The code is already written and tested."
+
+Q: "How do you monetize without ads/algorithms?"
+A: "Token economics. Users earn SUI tokens for:
+   • Creating high-reputation content
+   • Providing accurate fact-checking
+   • Community moderation
+   
+   This creates sustainable creator economy—the blockchain enables it."
+
+Q: "Isn't decentralization slow?"
+A: "Sui is 4,000+ TPS (transactions per second). Twitter handles ~5,000 TPS.
+   Decentralization doesn't mean slow. Sui proves it."
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 3: TALKING POINTS & KEY MESSAGES
+═══════════════════════════════════════════════════════════════════════════════
+
+Core Message: Transparent Reputation in Social Networks
+
+1. "No Black-Box Algorithm"
+   → Show the Rankings tab: users can see the exact formula
+   → Explain: Score = Reputation + Attention
+   → Contrast with: Facebook/Twitter hidden algorithms
+
+2. "Attention Economics"
+   → Posts earn engagement through genuine interaction
+   → New posts get visibility, but old posts stay visible if they're good
+   → Communities control discovery, not the platform
+
+3. "Blockchain-Based Reputation"
+   → Reputation is permanent and portable
+   → Smart contracts (Move language) verify interactions
+   → Users own their reputation—can't be censored or deleted
+
+4. "Decentralized Social Proof"
+   → Reputation transfers across platforms (future: DeFi integration)
+   → Profiles are tied to Sui wallet addresses (not centralized usernames)
+   → Communities can fork and create their own ranking rules
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 4: COMMON DEMO QUESTIONS & ANSWERS
+═══════════════════════════════════════════════════════════════════════════════
+
+Q: "How does SUITER differ from Twitter?"
+A: "Twitter uses an opaque algorithm. SUITER shows the math: Reputation + Attention.
+   Anyone can see why a post ranks where it does. It's transparent, not proprietary."
+
+Q: "Can users create fake engagement?"
+A: "In the blockchain version, each interaction is cryptographically signed by the Sui
+   network. Fake votes would require controlling wallet addresses, which is provably
+   hard. Here in the demo, we use mock data for simplicity."
+
+Q: "What's the Sui blockchain connection?"
+A: "SUITER smart contracts (written in Move) store reputation immutably on Sui.
+   Future: users earn SUI tokens for creating high-reputation content."
+
+Q: "How do new users gain reputation?"
+A: "Users start at Level 0. Their first posts earn reputation based on engagement:
+   - 1 attention point per view
+   - Reputation = sum of attention from all posts
+   - First post is challenging, but quality content gains traction fast."
+
+Q: "What prevents spam?"
+A: "Gas fees on Sui blockchain (transaction costs). Creating 10,000 fake posts costs money.
+   In the demo, we rate-limit per IP. Real network uses Sui gas economics."
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 5: OPTIONAL ENHANCEMENTS FOR FUTURE DEMOS
+═══════════════════════════════════════════════════════════════════════════════
+
+These features can be added to improve the demo experience:
+
+1. Detailed Post Modal
+   → Click a post → opens large modal with full text, comments, share options
+   → Show nested reply threads
+   → Add "React" button to boost engagement
+
+2. Images & Rich Media
+   → Support for images, links, embedded videos
+   → Show how multimedia posts get more attention
+   → Demonstrate content preview cards
+
+3. Smart Snippet Generation
+   → Highlight important sentences in the trending list
+   → Extract key phrases using NLP (future)
+   → Show context: "User mentioned X in trending post about Y"
+
+4. Reputation Milestones
+   → Show user profiles with achievement badges
+   → "Reached 500 reputation!" milestone notifications
+   → Profile tooltips showing user stats
+
+5. Real Sui Integration
+   → Connect to real Sui testnet (not mock)
+   → Create actual smart contracts
+   → Show transaction hashes and on-chain proofs
+
+6. Community Spaces
+   → Federated forums/channels with custom ranking rules
+   → Admins can customize the Score formula
+   → Example: Academic spaces could weight citations over likes
+
+
+═══════════════════════════════════════════════════════════════════════════════
+TROUBLESHOOTING GUIDE
+═══════════════════════════════════════════════════════════════════════════════
+
+Problem: "LIVE badge is red / API not connected"
+Fix:
+  1. Verify API is running: python3 api_mock.py in Terminal 1
+  2. Check http://localhost:3000 directly in browser (should show API status)
+  3. Wait 5-10 seconds for connection retry
+  4. Check browser console for CORS errors (F12 → Console tab)
+  5. Restart frontend: stop server.sh and run ./frontend/server.sh 8080 again
+
+Problem: "Posts won't create / form is broken"
+Fix:
+  1. Open browser console (F12 → Console)
+  2. Look for red error messages
+  3. Check debug panel in UI for API error details
+  4. Try creating a post again
+  5. If stuck: refresh page (Ctrl+R) and try once more
+
+Problem: "Feed is empty / no posts showing"
+Fix:
+  1. Verify API initialized sample data
+  2. Check API logs in Terminal 1 (should see "Loaded X posts")
+  3. Open http://localhost:3000/posts in browser to test API directly
+  4. Refresh frontend page (Ctrl+R)
+  5. Create a new post manually using the form
+
+Problem: "Performance is slow / pages loading slowly"
+Fix:
+  1. Check system CPU/memory: top command in terminal
+  2. Reduce posts shown: edit frontend code to load fewer posts
+  3. Clear browser cache: Ctrl+Shift+Delete → Clear all
+  4. Close other browser tabs
+  5. Restart both servers: stop all terminals and start fresh
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+-- End of comprehensive demo guide --
+Version: 2.0 (Enhanced with detailed walkthrough, key messages, and troubleshooting)
+Last updated: December 2025

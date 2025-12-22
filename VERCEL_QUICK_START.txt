@@ -1,0 +1,58 @@
+SUITER VERCEL DEPLOYMENT - QUICK START (5 MINUTES)
+═════════════════════════════════════════════════
+
+1. PUSH TO GITHUB
+   $ cd /workspaces/SUITER
+   $ git add .
+   $ git commit -m "Ready for Vercel"
+   $ git push origin main
+
+2. GO TO VERCEL.COM/NEW
+   • Sign in (create free account if needed)
+   • Click "Import Git Repository"
+   • Select "SUITER" repo
+   • Click "Import"
+
+3. CONFIGURE BUILD SETTINGS
+   • Framework: "Other" (static site)
+   • Build Command: (leave empty)
+   • Output Directory: "frontend"
+   • Root Directory: "./"
+
+4. ADD ENVIRONMENT VARIABLES (CRITICAL!)
+   Click "Environment Variables" and add:
+   
+   Name:  NEXT_PUBLIC_API_URL
+   Value: (choose one)
+   
+   Option A: Your deployed API server
+   https://suiter-api.up.railway.app
+   
+   Option B: Local API via ngrok
+   https://xxxx.ngrok.io
+   
+   Option C: Just use mock data
+   (leave empty or use http://localhost:3000)
+
+5. CLICK "DEPLOY"
+   ✓ Wait 2-3 minutes
+   ✓ Get your live URL: https://suiter-xxxxx.vercel.app
+
+DONE! Your frontend is live.
+
+NEXT STEPS:
+• Test at your Vercel URL
+• Check LIVE badge (should be green)
+• Create a post to verify it works
+• Share URL with judges
+
+═════════════════════════════════════════════════════════════
+
+For detailed troubleshooting, see: DEPLOYMENT_VERCEL.txt
+
+Files prepared for deployment:
+✓ /frontend/ - Frontend code (ready to deploy)
+✓ /vercel.json - Vercel configuration
+✓ /.vercelignore - Ignore unnecessary files
+✓ /api/proxy.js - Optional API proxy (if needed)
+✓ /DEPLOYMENT_VERCEL.txt - Full deployment guide

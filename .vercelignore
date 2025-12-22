@@ -1,0 +1,39 @@
+# Vercel Deployment Configuration
+# Ignore files that shouldn't be deployed to Vercel
+
+# Backend/API files (runs locally)
+api_mock.py
+frontend/proxy_server.py
+frontend/server.sh
+
+# Contracts (for reference, doesn't run on Vercel)
+contracts/
+database/
+
+# Development files
+node_modules/
+.git/
+.gitignore
+
+# Rust/API builds (not needed on Vercel)
+api/target/
+indexer/target/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Demo/docs (optional - keep for reference)
+*.md
+DEMO_INSTRUCTIONS.txt
+DEPLOYMENT_*.md

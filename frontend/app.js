@@ -80,21 +80,9 @@ const tabButtons = document.querySelectorAll('.tab-button');
 const tabContents = document.querySelectorAll('.tab-content');
 const topPostsSidebar = document.getElementById('top-posts-sidebar');
 
-// Debug helper
+// Debug helper (disabled)
 function logDebug(message, level='info') {
-    try {
-        const panel = document.getElementById('debug-panel');
-        if (!panel) return;
-        const line = document.createElement('div');
-        line.className = `debug-line debug-${level}`;
-        const time = new Date().toISOString().slice(11,19);
-        line.textContent = `[${time}] ${message}`;
-        panel.insertBefore(line, panel.firstChild);
-        // keep panel manageable
-        while (panel.childNodes.length > 200) panel.removeChild(panel.lastChild);
-    } catch (e) {
-        // ignore
-    }
+    // Debug panel removed - logging disabled
 }
 
 // Initialize
